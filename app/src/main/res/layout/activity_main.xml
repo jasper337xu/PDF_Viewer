@@ -21,4 +21,28 @@
             android:orientation="vertical"
     />
 
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+        <Button
+                android:id="@+id/button_prev_page"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/prev_page"
+                android:onClick="onButtonPrevPageClicked" />
+
+        <Button
+                android:id="@+id/button_next_page"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/next_page"
+                android:onClick="onButtonNextPageClicked" />
+    </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

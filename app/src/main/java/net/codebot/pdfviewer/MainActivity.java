@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
+import android.view.View;
 import android.widget.LinearLayout;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
@@ -53,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             openRenderer(this);
             showPage(0);
-            closeRenderer();
+            //closeRenderer();
         } catch (IOException exception) {
             Log.d(LOGNAME, "Error opening PDF");
         }
@@ -108,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void showPage(int index) {
-        if (pdfRenderer.getPageCount() <= index) {
+        if (pdfRenderer.getPageCount() <= index || index < 0) {
             return;
         }
         // Close the current page before opening another one.
@@ -127,5 +128,15 @@ public class MainActivity extends AppCompatActivity {
 
         // Display the page
         pageImage.setImage(bitmap);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    public void onButtonPrevPageClicked(View view) {
+        showPage(currentPage.getIndex() - 1);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    public void onButtonNextPageClicked(View view) {
+        showPage(currentPage.getIndex() + 1);
     }
 }
