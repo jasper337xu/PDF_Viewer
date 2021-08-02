@@ -4,4 +4,5 @@
     <string name="next_page">Next</string>
     <string name="draw">Draw</string>
     <string name="highlight">Highlight</string>
+    <string name="erase">Erase</string>
 </resources>

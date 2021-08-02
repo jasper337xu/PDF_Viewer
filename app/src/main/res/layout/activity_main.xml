@@ -61,10 +61,17 @@
                 android:onClick="onButtonHighlightClicked" />
 
         <Button
+                android:id="@+id/button_erase"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/erase"
+                android:onClick="onButtonEraseClicked" />
+
+        <Button
                 android:id="@+id/button_prev_page"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="200dp"
+                android:layout_marginLeft="150dp"
                 android:text="@string/prev_page"
                 android:onClick="onButtonPrevPageClicked" />
 

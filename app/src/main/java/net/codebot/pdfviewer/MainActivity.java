@@ -160,10 +160,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onButtonDrawClicked(View view) {
+        pageImage.isErasing = false;
+        pageImage.isErasingDone = false;
         pageImage.setBrush(pageImage.getPencil());
     }
 
     public void onButtonHighlightClicked(View view) {
+        pageImage.isErasing = false;
+        pageImage.isErasingDone = false;
         pageImage.setBrush(pageImage.getHighlighter());
+    }
+
+    public void onButtonEraseClicked(View view) {
+        pageImage.isErasing = true;
+        pageImage.isErasingDone = false;
     }
 }
