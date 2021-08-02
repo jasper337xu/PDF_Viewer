@@ -61,6 +61,10 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException exception) {
             Log.d(LOGNAME, "Error opening PDF");
         }
+
+        // set the filename
+        TextView textViewFilename = findViewById(R.id.filename);
+        textViewFilename.setText(FILENAME);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -153,5 +157,13 @@ public class MainActivity extends AppCompatActivity {
             index += 1;
             textViewPageNumber.setText("Page " + index + "/" + pdfRenderer.getPageCount());
         }
+    }
+
+    public void onButtonDrawClicked(View view) {
+        pageImage.setBrush(pageImage.getPencil());
+    }
+
+    public void onButtonHighlightClicked(View view) {
+        pageImage.setBrush(pageImage.getHighlighter());
     }
 }
