@@ -175,4 +175,12 @@ public class MainActivity extends AppCompatActivity {
         pageImage.isErasing = true;
         pageImage.isErasingDone = false;
     }
+
+    public void onButtonUndoClicked(View view) {
+
+    }
+
+    public void onButtonRedoClicked(View view) {
+
+    }
 }

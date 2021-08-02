@@ -68,10 +68,24 @@
                 android:onClick="onButtonEraseClicked" />
 
         <Button
+                android:id="@+id/button_undo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/undo"
+                android:onClick="onButtonUndoClicked" />
+
+        <Button
+                android:id="@+id/button_redo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/redo"
+                android:onClick="onButtonRedoClicked" />
+
+        <Button
                 android:id="@+id/button_prev_page"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="150dp"
+                android:layout_marginLeft="70dp"
                 android:text="@string/prev_page"
                 android:onClick="onButtonPrevPageClicked" />
 

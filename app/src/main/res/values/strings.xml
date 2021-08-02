@@ -5,4 +5,6 @@
     <string name="draw">Draw</string>
     <string name="highlight">Highlight</string>
     <string name="erase">Erase</string>
+    <string name="undo">Undo</string>
+    <string name="redo">Redo</string>
 </resources>
