@@ -9,6 +9,7 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -55,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
             openRenderer(this);
             showPage(0);
             //closeRenderer();
+            TextView textViewPageNumber = findViewById(R.id.page_number);
+            textViewPageNumber.setText("Page 1/" + pdfRenderer.getPageCount());
         } catch (IOException exception) {
             Log.d(LOGNAME, "Error opening PDF");
         }
@@ -132,11 +135,23 @@ public class MainActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void onButtonPrevPageClicked(View view) {
-        showPage(currentPage.getIndex() - 1);
+        int index = currentPage.getIndex() - 1;
+        showPage(index);
+        if (index >= 0) {
+            TextView textViewPageNumber = findViewById(R.id.page_number);
+            index += 1;
+            textViewPageNumber.setText("Page " + index + "/" + pdfRenderer.getPageCount());
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void onButtonNextPageClicked(View view) {
-        showPage(currentPage.getIndex() + 1);
+        int index = currentPage.getIndex() + 1;
+        showPage(index);
+        if (index < pdfRenderer.getPageCount()) {
+            TextView textViewPageNumber = findViewById(R.id.page_number);
+            index += 1;
+            textViewPageNumber.setText("Page " + index + "/" + pdfRenderer.getPageCount());
+        }
     }
 }

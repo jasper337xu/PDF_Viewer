@@ -22,6 +22,7 @@
     />
 
     <LinearLayout
+            android:id="@+id/buttons_prev_next"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
@@ -30,19 +31,27 @@
 
         <Button
                 android:id="@+id/button_prev_page"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_marginLeft="350dp"
                 android:text="@string/prev_page"
                 android:onClick="onButtonPrevPageClicked" />
 
         <Button
                 android:id="@+id/button_next_page"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+
                 android:text="@string/next_page"
                 android:onClick="onButtonNextPageClicked" />
+
+        <TextView
+                android:id="@+id/page_number"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="280dp"
+                android:text="Page" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
