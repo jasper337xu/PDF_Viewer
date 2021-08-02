@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
             //closeRenderer();
             TextView textViewPageNumber = findViewById(R.id.page_number);
             textViewPageNumber.setText("Page 1/" + pdfRenderer.getPageCount());
+            pageImage.setPageIndex(0);
         } catch (IOException exception) {
             Log.d(LOGNAME, "Error opening PDF");
         }
@@ -143,6 +144,8 @@ public class MainActivity extends AppCompatActivity {
         showPage(index);
         if (index >= 0) {
             TextView textViewPageNumber = findViewById(R.id.page_number);
+            pageImage.setPageIndex(index);
+            pageImage.setPathToNull();
             index += 1;
             textViewPageNumber.setText("Page " + index + "/" + pdfRenderer.getPageCount());
         }
@@ -154,6 +157,8 @@ public class MainActivity extends AppCompatActivity {
         showPage(index);
         if (index < pdfRenderer.getPageCount()) {
             TextView textViewPageNumber = findViewById(R.id.page_number);
+            pageImage.setPageIndex(index);
+            pageImage.setPathToNull();
             index += 1;
             textViewPageNumber.setText("Page " + index + "/" + pdfRenderer.getPageCount());
         }
