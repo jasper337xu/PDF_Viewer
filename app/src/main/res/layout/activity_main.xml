@@ -81,11 +81,19 @@
                 android:text="@string/redo"
                 android:onClick="onButtonRedoClicked" />
 
+        <TextView
+                android:id="@+id/page_number"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="90dp"
+                android:text="Page" />
+
         <Button
                 android:id="@+id/button_prev_page"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="70dp"
+                android:layout_marginRight="5dp"
                 android:text="@string/prev_page"
                 android:onClick="onButtonPrevPageClicked" />
 
@@ -93,17 +101,10 @@
                 android:id="@+id/button_next_page"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-
+                android:layout_marginRight="5dp"
                 android:text="@string/next_page"
                 android:onClick="onButtonNextPageClicked" />
 
-        <TextView
-                android:id="@+id/page_number"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginLeft="180dp"
-                android:text="Page" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
