@@ -412,6 +412,10 @@ public class PDFimage extends ImageView {
         this.isMatrixZoom = isMatrixZoom;
     }
 
+    void setMatrixToEmpty() {
+        this.matrix = new Matrix();
+    }
+
     // set image as background
     public void setImage(Bitmap bitmap) {
         this.bitmap = bitmap;
@@ -435,9 +439,6 @@ public class PDFimage extends ImageView {
             if (isMatrixZoom) {
                 bitmap = Bitmap.createBitmap(curPage.getWidth(), curPage.getHeight(), Bitmap.Config.ARGB_8888);
                 curPage.render(bitmap, null, matrix, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-            } else {
-                bitmap = Bitmap.createBitmap(curPage.getWidth(), curPage.getHeight(), Bitmap.Config.ARGB_8888);
-                curPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
             }
             this.setImageBitmap(bitmap);
         }

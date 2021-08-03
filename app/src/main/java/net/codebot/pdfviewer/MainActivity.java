@@ -144,6 +144,7 @@ public class MainActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void onButtonPrevPageClicked(View view) {
         pageImage.setIsMatrixZoom(false);
+        pageImage.setMatrixToEmpty();
         int index = currentPage.getIndex() - 1;
         showPage(index);
         if (index >= 0) {
@@ -158,6 +159,7 @@ public class MainActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void onButtonNextPageClicked(View view) {
         pageImage.setIsMatrixZoom(false);
+        pageImage.setMatrixToEmpty();
         int index = currentPage.getIndex() + 1;
         showPage(index);
         if (index < pdfRenderer.getPageCount()) {
