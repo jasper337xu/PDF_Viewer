@@ -182,10 +182,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onButtonUndoClicked(View view) {
-
+        pageImage.setPathToNull();
+        pageImage.handleUndo();
     }
 
     public void onButtonRedoClicked(View view) {
-
+        pageImage.setPathToNull();
+        pageImage.handleRedo();
     }
 }
