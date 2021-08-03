@@ -4,9 +4,12 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.*;
 import android.graphics.Paint.Style;
+import android.graphics.pdf.PdfRenderer;
+import android.os.Build;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.ImageView;
+import androidx.annotation.RequiresApi;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,11 +25,8 @@ public class PDFimage extends ImageView {
 
     // drawing path
     Path path = null;
-//    ArrayList<Path> paths = new ArrayList();
     Map<Integer, ArrayList<Path>> idxToPaths = new HashMap<>();
-//    ArrayList<Paint> paints = new ArrayList();
     Map<Integer, ArrayList<Paint>> idxToPaints = new HashMap<>();
-//    ArrayList<String> operations = new ArrayList();
     Map<Integer, ArrayList<String>> idxToOperations = new HashMap<>();
 
     Map<Integer, Stack<Path>> idxToPathsStack1 = new HashMap<>();
@@ -44,6 +44,7 @@ public class PDFimage extends ImageView {
     // image to display
     Bitmap bitmap;
     Paint paint, pencil, highlighter;
+    PdfRenderer.Page curPage;
 
     // constructor
     public PDFimage(Context context) {
@@ -53,51 +54,146 @@ public class PDFimage extends ImageView {
         setBrush(pencil);
     }
 
+    // we save a lot of points because they need to be processed
+    // during touch events e.g. ACTION_MOVE
+    float x1, x2, y1, y2, old_x1, old_y1, old_x2, old_y2;
+    float mid_x = -1f, mid_y = -1f, old_mid_x = -1f, old_mid_y = -1f;
+    int p1_id, p1_index, p2_id, p2_index;
+
+    // store cumulative transformations
+    // the inverse matrix is used to align points with the transformations - see below
+    Matrix matrix = new Matrix();
+    Matrix inverse = new Matrix();
+    boolean isMatrixZoom = false;
+
     // capture touch events (down/move/up) to create a path
     // and use that to create a stroke that we can draw
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                Log.d(LOGNAME, "Action down");
-                path = new Path();
-                path.moveTo(event.getX(), event.getY());
-                invalidate();
-                break;
-            case MotionEvent.ACTION_MOVE:
-                Log.d(LOGNAME, "Action move");
-                path.lineTo(event.getX(), event.getY());
-                invalidate();
-                break;
-            case MotionEvent.ACTION_UP:
-                Log.d(LOGNAME, "Action up");
-                handleActionUp();
-                break;
+        if (event.getPointerCount() == 1) { // 1 point is drawing or erasing
+            p1_id = event.getPointerId(0);
+            p1_index = event.findPointerIndex(p1_id);
+
+            // invert using the current matrix to account for pan/scale
+            // inverts in-place and returns boolean
+            inverse = new Matrix();
+            matrix.invert(inverse);
+
+            // mapPoints returns values in-place
+            float[] inverted = new float[] { event.getX(p1_index), event.getY(p1_index) };
+            inverse.mapPoints(inverted);
+            x1 = inverted[0];
+            y1 = inverted[1];
+
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    Log.d(LOGNAME, "Action down");
+                    path = new Path();
+                    path.moveTo(x1, y1);
+                    invalidate();
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    Log.d(LOGNAME, "Action move");
+                    path.lineTo(x1, y1);
+                    break;
+                case MotionEvent.ACTION_UP:
+                    Log.d(LOGNAME, "Action up");
+                    handleActionUp();
+                    break;
+            }
+        }
+        else if (event.getPointerCount() == 2) { // 2 points is zoom/pan
+            // point 1
+            p1_id = event.getPointerId(0);
+            p1_index = event.findPointerIndex(p1_id);
+            // mapPoints returns values in-place
+            float[] inverted = new float[] { event.getX(p1_index), event.getY(p1_index) };
+            inverse.mapPoints(inverted);
+            // first pass, initialize the old == current value
+            if (old_x1 < 0 || old_y1 < 0) {
+                old_x1 = x1 = inverted[0];
+                old_y1 = y1 = inverted[1];
+            } else {
+                old_x1 = x1;
+                old_y1 = y1;
+                x1 = inverted[0];
+                y1 = inverted[1];
+            }
+
+            // point 2
+            p2_id = event.getPointerId(1);
+            p2_index = event.findPointerIndex(p2_id);
+            // mapPoints returns values in-place
+            inverted = new float[] { event.getX(p2_index), event.getY(p2_index) };
+            inverse.mapPoints(inverted);
+            // first pass, initialize the old == current value
+            if (old_x2 < 0 || old_y2 < 0) {
+                old_x2 = x2 = inverted[0];
+                old_y2 = y2 = inverted[1];
+            } else {
+                old_x2 = x2;
+                old_y2 = y2;
+                x2 = inverted[0];
+                y2 = inverted[1];
+            }
+
+            // midpoint
+            mid_x = (x1 + x2) / 2;
+            mid_y = (y1 + y2) / 2;
+            old_mid_x = (old_x1 + old_x2) / 2;
+            old_mid_y = (old_y1 + old_y2) / 2;
+
+            // distance
+            float d_old = (float) Math.sqrt(Math.pow((old_x1 - old_x2), 2) + Math.pow((old_y1 - old_y2), 2));
+            float d = (float) Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2));
+
+            // pan and zoom during MOVE event
+            if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                Log.d(LOGNAME, "Multitouch move");
+                // pan == translate of midpoint
+                float dx = mid_x - old_mid_x;
+                float dy = mid_y - old_mid_y;
+                matrix.preTranslate(dx, dy);
+                isMatrixZoom = true;
+                Log.d(LOGNAME, "translate: " + dx + "," + dy);
+
+                // zoom == change of spread between p1 and p2
+                float scale = d/d_old;
+                scale = Math.max(0, scale);
+                matrix.preScale(scale, scale, mid_x, mid_y);
+                Log.d(LOGNAME, "scale: " + scale);
+
+            // reset on up
+            } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                old_x1 = -1f;
+                old_y1 = -1f;
+                old_x2 = -1f;
+                old_y2 = -1f;
+                old_mid_x = -1f;
+                old_mid_y = -1f;
+            }
         }
         return true;
     }
 
     private void handleActionUp() {
         if (!isErasing) {
-//                    paths.add(path);
             if (!idxToPaths.containsKey(pageIndex)) {
                 idxToPaths.put(pageIndex, new ArrayList<Path>());
             }
             idxToPaths.get(pageIndex).add(path);
-//                    paints.add(paint);
+
             if (!idxToPaints.containsKey(pageIndex)) {
                 idxToPaints.put(pageIndex, new ArrayList<Paint>());
             }
             idxToPaints.get(pageIndex).add(paint);
 
             if (paint == pencil) {
-//                        operations.add("draw");
                 if (!idxToOperations.containsKey(pageIndex)) {
                     idxToOperations.put(pageIndex, new ArrayList<String>());
                 }
                 idxToOperations.get(pageIndex).add("draw");
             } else if (paint == highlighter) {
-//                        operations.add("highlight");
                 if (!idxToOperations.containsKey(pageIndex)) {
                     idxToOperations.put(pageIndex, new ArrayList<String>());
                 }
@@ -106,17 +202,16 @@ public class PDFimage extends ImageView {
 
             updateStacks1ForDraw();
         } else {
-//                    paths.add(path);
             if (!idxToPaths.containsKey(pageIndex)) {
                 idxToPaths.put(pageIndex, new ArrayList<Path>());
             }
             idxToPaths.get(pageIndex).add(path);
-//                    paints.add(null);
+
             if (!idxToPaints.containsKey(pageIndex)) {
                 idxToPaints.put(pageIndex, new ArrayList<Paint>());
             }
             idxToPaints.get(pageIndex).add(null);
-//                    operations.add("erase");
+
             if (!idxToOperations.containsKey(pageIndex)) {
                 idxToOperations.put(pageIndex, new ArrayList<String>());
             }
@@ -309,6 +404,14 @@ public class PDFimage extends ImageView {
         }
     }
 
+    public void setCurPage(PdfRenderer.Page curPage) {
+        this.curPage = curPage;
+    }
+
+    void setIsMatrixZoom(boolean isMatrixZoom) {
+        this.isMatrixZoom = isMatrixZoom;
+    }
+
     // set image as background
     public void setImage(Bitmap bitmap) {
         this.bitmap = bitmap;
@@ -320,11 +423,22 @@ public class PDFimage extends ImageView {
         this.paint = paint;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        // apply transformations from the event handler above
+        canvas.concat(matrix);
+
         // draw background
         if (bitmap != null) {
+            if (isMatrixZoom) {
+                bitmap = Bitmap.createBitmap(curPage.getWidth(), curPage.getHeight(), Bitmap.Config.ARGB_8888);
+                curPage.render(bitmap, null, matrix, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+            } else {
+                bitmap = Bitmap.createBitmap(curPage.getWidth(), curPage.getHeight(), Bitmap.Config.ARGB_8888);
+                curPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+            }
             this.setImageBitmap(bitmap);
         }
 
@@ -341,10 +455,7 @@ public class PDFimage extends ImageView {
             curPaints = idxToPaints.get(pageIndex);
         }
         for (int i = 0; i < curPaths.size(); i++) {
-//        for (int i = 0; i < paths.size(); i++) {
-//            Path p = paths.get(i);
             Path p = curPaths.get(i);
-//            Paint pPaint = paints.get(i);
             Paint pPaint = curPaints.get(i);
             if (pPaint != null) { // do not draw when it is an erasing path
                 canvas.drawPath(p, pPaint);
@@ -394,17 +505,14 @@ public class PDFimage extends ImageView {
             curPaints = idxToPaints.get(pageIndex);
         }
         for (int i = 0; i < curPaths.size() - 1; i++) { // the erase path is the last item in paths
-//        for (int i = 0; i < paths.size() - 1; i++) { // the erase path is the last item in paths
-//            Paint existingPaint = paints.get(i);
             Paint existingPaint = curPaints.get(i);
             if (existingPaint == null) {
                 continue;
             }
-//            Path existingPath = paths.get(i);
+
             Path existingPath = curPaths.get(i);
             existingPathRegion.setPath(existingPath, clip);
             if (existingPathRegion.op(erasePathRegion, Region.Op.INTERSECT)) {
-//                paints.set(i, null);
                 curPaints.set(i, null);
             }
         }

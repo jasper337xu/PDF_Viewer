@@ -134,12 +134,16 @@ public class MainActivity extends AppCompatActivity {
         // Pass either RENDER_MODE_FOR_DISPLAY or RENDER_MODE_FOR_PRINT for the last parameter.
         currentPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
 
+        // Pass currentPage to pageImage so that we can zoom/pan the pdf(i.e. currentPage)
+        pageImage.setCurPage(currentPage);
+
         // Display the page
         pageImage.setImage(bitmap);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void onButtonPrevPageClicked(View view) {
+        pageImage.setIsMatrixZoom(false);
         int index = currentPage.getIndex() - 1;
         showPage(index);
         if (index >= 0) {
@@ -153,6 +157,7 @@ public class MainActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void onButtonNextPageClicked(View view) {
+        pageImage.setIsMatrixZoom(false);
         int index = currentPage.getIndex() + 1;
         showPage(index);
         if (index < pdfRenderer.getPageCount()) {
