@@ -71,58 +71,62 @@ public class PDFimage extends ImageView {
                 break;
             case MotionEvent.ACTION_UP:
                 Log.d(LOGNAME, "Action up");
-                if (!isErasing) {
-//                    paths.add(path);
-                    if (!idxToPaths.containsKey(pageIndex)) {
-                        idxToPaths.put(pageIndex, new ArrayList<Path>());
-                    }
-                    idxToPaths.get(pageIndex).add(path);
-//                    paints.add(paint);
-                    if (!idxToPaints.containsKey(pageIndex)) {
-                        idxToPaints.put(pageIndex, new ArrayList<Paint>());
-                    }
-                    idxToPaints.get(pageIndex).add(paint);
-
-                    if (paint == pencil) {
-//                        operations.add("draw");
-                        if (!idxToOperations.containsKey(pageIndex)) {
-                            idxToOperations.put(pageIndex, new ArrayList<String>());
-                        }
-                        idxToOperations.get(pageIndex).add("draw");
-                    } else if (paint == highlighter) {
-//                        operations.add("highlight");
-                        if (!idxToOperations.containsKey(pageIndex)) {
-                            idxToOperations.put(pageIndex, new ArrayList<String>());
-                        }
-                        idxToOperations.get(pageIndex).add("highlight");
-                    }
-
-                    updateStacks1ForDraw();
-                } else {
-//                    paths.add(path);
-                    if (!idxToPaths.containsKey(pageIndex)) {
-                        idxToPaths.put(pageIndex, new ArrayList<Path>());
-                    }
-                    idxToPaths.get(pageIndex).add(path);
-//                    paints.add(null);
-                    if (!idxToPaints.containsKey(pageIndex)) {
-                        idxToPaints.put(pageIndex, new ArrayList<Paint>());
-                    }
-                    idxToPaints.get(pageIndex).add(null);
-//                    operations.add("erase");
-                    if (!idxToOperations.containsKey(pageIndex)) {
-                        idxToOperations.put(pageIndex, new ArrayList<String>());
-                    }
-                    idxToOperations.get(pageIndex).add("erase");
-
-                    updateStacks1ForErase();
-                    isErasingDone = true;
-                }
-
-                invalidate();
+                handleActionUp();
                 break;
         }
         return true;
+    }
+
+    private void handleActionUp() {
+        if (!isErasing) {
+//                    paths.add(path);
+            if (!idxToPaths.containsKey(pageIndex)) {
+                idxToPaths.put(pageIndex, new ArrayList<Path>());
+            }
+            idxToPaths.get(pageIndex).add(path);
+//                    paints.add(paint);
+            if (!idxToPaints.containsKey(pageIndex)) {
+                idxToPaints.put(pageIndex, new ArrayList<Paint>());
+            }
+            idxToPaints.get(pageIndex).add(paint);
+
+            if (paint == pencil) {
+//                        operations.add("draw");
+                if (!idxToOperations.containsKey(pageIndex)) {
+                    idxToOperations.put(pageIndex, new ArrayList<String>());
+                }
+                idxToOperations.get(pageIndex).add("draw");
+            } else if (paint == highlighter) {
+//                        operations.add("highlight");
+                if (!idxToOperations.containsKey(pageIndex)) {
+                    idxToOperations.put(pageIndex, new ArrayList<String>());
+                }
+                idxToOperations.get(pageIndex).add("highlight");
+            }
+
+            updateStacks1ForDraw();
+        } else {
+//                    paths.add(path);
+            if (!idxToPaths.containsKey(pageIndex)) {
+                idxToPaths.put(pageIndex, new ArrayList<Path>());
+            }
+            idxToPaths.get(pageIndex).add(path);
+//                    paints.add(null);
+            if (!idxToPaints.containsKey(pageIndex)) {
+                idxToPaints.put(pageIndex, new ArrayList<Paint>());
+            }
+            idxToPaints.get(pageIndex).add(null);
+//                    operations.add("erase");
+            if (!idxToOperations.containsKey(pageIndex)) {
+                idxToOperations.put(pageIndex, new ArrayList<String>());
+            }
+            idxToOperations.get(pageIndex).add("erase");
+
+            updateStacks1ForErase();
+            isErasingDone = true;
+        }
+
+        invalidate();
     }
 
     private void updateStacks1ForDraw() {
